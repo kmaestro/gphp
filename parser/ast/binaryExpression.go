@@ -1,11 +1,15 @@
 package ast
 
+import (
+	"fmt"
+)
+
 type binaryExpression struct {
 	expr1, expr2 Expression
-	operation    string
+	operation    rune
 }
 
-func NewBinaryExpression(operation string, expr1 Expression, expr2 Expression) *binaryExpression {
+func NewBinaryExpression(operation rune, expr1 Expression, expr2 Expression) *binaryExpression {
 	return &binaryExpression{
 		operation: operation,
 		expr1:     expr1,
@@ -15,13 +19,17 @@ func NewBinaryExpression(operation string, expr1 Expression, expr2 Expression) *
 
 func (be *binaryExpression) Evel() float32 {
 	switch be.operation {
-	case "-":
+	case '-':
 		return be.expr1.Evel() - be.expr2.Evel()
-	case "*":
+	case '*':
 		return be.expr1.Evel() * be.expr2.Evel()
-	case "/":
+	case '/':
 		return be.expr1.Evel() / be.expr2.Evel()
 	default:
 		return be.expr1.Evel() + be.expr2.Evel()
 	}
+}
+
+func (be *binaryExpression) ToString() string {
+	return fmt.Sprintf("[%s %c %s]", be.expr1.ToString(), be.operation, be.expr2.ToString())
 }

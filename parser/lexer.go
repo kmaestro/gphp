@@ -1,41 +1,39 @@
 package parser
 
 import (
-	"strconv"
 	"strings"
 )
 
-const OPRATOR_CHARS = "+-*/()"
-
-var OPERATOR_TOKENS = map[string]int8{
-	"+": int8(PLUS),
-	"-": int8(MINUS),
-	"*": int8(STAR),
-	"/": int8(SLASH),
-	"(": int8(LPAREN),
-	")": int8(RPAREN),
-}
-
 type Lexer struct {
 	input  string
-	length int64
+	length int
 	tokens []Token
 	pos    int
 }
 
 func NewLexer(input string) *Lexer {
-	return &Lexer{input: input, length: int64(len(input))}
+	return &Lexer{
+		input:  input,
+		length: len(input),
+		tokens: make([]Token, 0),
+		pos:    0,
+	}
 }
 
 func (l *Lexer) Tokenize() []Token {
-	for l.pos < int(l.length) {
-		currency := l.peek(0)
-		_, error := strconv.ParseInt(currency, 8, 8)
-		if error == nil {
+	for l.pos < l.length {
+		current := l.peek(0)
+		if l.isDigit(current) {
 			l.tokenizeNumber()
-		} else if strings.Contains(OPRATOR_CHARS, currency) {
+		} else if isLetter(current) {
+			l.tokenizeWord()
+		} else if current == '#' {
+			l.next()
+			l.tokenizeHexNumber()
+		} else if strings.ContainsRune("+-*/()", current) {
 			l.tokenizeOperator()
 		} else {
+			// whitespaces
 			l.next()
 		}
 	}
@@ -43,26 +41,74 @@ func (l *Lexer) Tokenize() []Token {
 }
 
 func (l *Lexer) tokenizeNumber() {
-	currency := l.peek(0)
-	l.tokens = append(l.tokens, *NewToken(NUMBER, currency))
-	l.next()
+	var buffer strings.Builder
+	current := l.peek(0)
+	for {
+		if current == '.' {
+			if strings.Contains(buffer.String(), ".") {
+				panic("Invalid float number")
+			}
+		} else if !l.isDigit(current) {
+			break
+		}
+		buffer.WriteRune(current)
+		current = l.next()
+	}
+	l.addToken(NUMBER, buffer.String())
+}
+
+func (l *Lexer) tokenizeHexNumber() {
+	var buffer strings.Builder
+	current := l.peek(0)
+	for l.isDigit(current) {
+		buffer.WriteRune(current)
+		current = l.next()
+	}
+	l.addToken(HEX_NUMBER, buffer.String())
+}
+
+func (l *Lexer) isDigit(r rune) bool {
+	return '0' <= r && r <= '9'
+}
+
+func isLetter(r rune) bool {
+	return ('a' <= r && r <= 'z') || ('A' <= r && r <= 'Z')
 }
 
 func (l *Lexer) tokenizeOperator() {
-	currency := l.peek(0)
-	l.tokens = append(l.tokens, *NewToken(TokenType(OPERATOR_TOKENS[currency]), currency))
+	operators := "+-*/()"
+	position := strings.IndexRune(operators, l.peek(0))
+	tokenTypes := []TokenType{PLUS, MINUS, STAR, SLASH, LPAREN, RPAREN}
+	l.addToken(tokenTypes[position], "")
 	l.next()
 }
 
-func (l *Lexer) peek(relativePosition int) string {
-	position := l.pos + relativePosition
-	if position >= int(l.length) {
-		return string(ILLEGAL)
+func (l *Lexer) tokenizeWord() {
+	var buffer strings.Builder
+	current := l.peek(0)
+	for {
+		if !isLetter(current) && !l.isDigit(current) && current != '_' && current != '$' {
+			break
+		}
+		buffer.WriteRune(current)
+		current = l.next()
 	}
-	return string(l.input[position])
+	l.addToken(WORD, buffer.String())
 }
 
-func (l *Lexer) next() string {
+func (l *Lexer) next() rune {
 	l.pos++
 	return l.peek(0)
+}
+
+func (l *Lexer) peek(relativePosition int) rune {
+	position := l.pos + relativePosition
+	if position >= l.length {
+		return '\x00'
+	}
+	return rune(l.input[position])
+}
+
+func (l *Lexer) addToken(tokenType TokenType, text string) {
+	l.tokens = append(l.tokens, *NewToken(tokenType, text))
 }

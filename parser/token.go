@@ -1,6 +1,6 @@
 package parser
 
-type TokenType int8
+type TokenType rune
 
 const (
 	ILLEGAL TokenType = iota
@@ -14,6 +14,8 @@ const (
 
 	LPAREN
 	RPAREN
+
+	WORD
 
 	EOF
 )

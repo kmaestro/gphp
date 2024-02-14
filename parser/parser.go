@@ -1,30 +1,29 @@
 package parser
 
 import (
-	"errors"
-	"fmt"
 	"php/parser/ast"
 	"strconv"
 )
 
-var eof Token = Token{text: "", tokenType: int8(EOF)}
-
 type Parser struct {
 	tokens []Token
-	pos    int
 	size   int
+	pos    int
 }
 
 func NewParser(tokens []Token) *Parser {
-	return &Parser{tokens: tokens, size: len(tokens)}
+	return &Parser{
+		tokens: tokens,
+		size:   len(tokens),
+		pos:    0,
+	}
 }
 
 func (p *Parser) Parse() []ast.Expression {
-	var result []ast.Expression
+	result := make([]ast.Expression, 0)
 	for !p.match(EOF) {
 		result = append(result, p.expression())
 	}
-	fmt.Println(result)
 	return result
 }
 
@@ -33,80 +32,88 @@ func (p *Parser) expression() ast.Expression {
 }
 
 func (p *Parser) additive() ast.Expression {
-	var result ast.Expression = p.multiplicative()
+	result := p.multiplicative()
 
-	for true {
+	for {
 		if p.match(PLUS) {
-			result = ast.NewBinaryExpression("+", result, p.multiplicative())
+			result = ast.NewBinaryExpression(
+				'+',
+				result,
+				p.multiplicative(),
+			)
 			continue
 		}
 		if p.match(MINUS) {
-			result = ast.NewBinaryExpression("-", result, p.multiplicative())
+			result = ast.NewBinaryExpression(
+				'-',
+				result,
+				p.multiplicative(),
+			)
 			continue
 		}
 		break
 	}
+
 	return result
 }
 
 func (p *Parser) multiplicative() ast.Expression {
-	var result ast.Expression = p.unary()
+	result := p.unary()
 
-	for true {
+	for {
 		if p.match(STAR) {
-			result = ast.NewBinaryExpression("*", result, p.unary())
+			result = ast.NewBinaryExpression(
+				'*',
+				result,
+				p.unary(),
+			)
 			continue
 		}
 		if p.match(SLASH) {
-			result = ast.NewBinaryExpression("/", result, p.unary())
+			result = ast.NewBinaryExpression(
+				'/',
+				result,
+				p.unary(),
+			)
 			continue
 		}
 		break
 	}
+
 	return result
 }
 
 func (p *Parser) unary() ast.Expression {
-
 	if p.match(MINUS) {
-		expression, _ := p.primary()
-		return ast.NewUnaryExpression("*", expression)
+		return ast.NewUnaryExpression('-', p.primary())
 	}
 	if p.match(PLUS) {
-		expression, _ := p.primary()
-		return expression
+		return p.primary()
 	}
-
-	expression, _ := p.primary()
-	return expression
+	return p.primary()
 }
 
-func (p *Parser) primary() (ast.Expression, error) {
+func (p *Parser) primary() ast.Expression {
 	current := p.get(0)
-
 	if p.match(NUMBER) {
-		s, _ := strconv.ParseFloat(current.text, 32)
-		return ast.NewNumberExpression(float32(s)), nil
+		val, _ := strconv.ParseFloat(current.text, 64)
+		return ast.NewNumberExpression(float32(val))
 	}
-
 	if p.match(HEX_NUMBER) {
-		s, _ := strconv.ParseFloat(current.text, 32)
-		return ast.NewNumberExpression(float32(s)), nil
+		val, _ := strconv.ParseInt(current.text, 16, 64)
+		return ast.NewNumberExpression(float32(val))
 	}
-
 	if p.match(LPAREN) {
-		var result ast.Expression = p.expression()
+		result := p.expression()
 		p.match(RPAREN)
-		return result, nil
+		return result
 	}
-
-	return nil, errors.New("Unknown expression")
+	panic("Unknown expression")
 }
 
 func (p *Parser) match(tokenType TokenType) bool {
-	currency := p.get(0)
-
-	if tokenType != TokenType(currency.tokenType) {
+	current := p.get(0)
+	if tokenType != TokenType(current.tokenType) {
 		return false
 	}
 	p.pos++
@@ -115,8 +122,8 @@ func (p *Parser) match(tokenType TokenType) bool {
 
 func (p *Parser) get(relativePosition int) Token {
 	position := p.pos + relativePosition
-	if position >= int(p.size) {
-		return eof
+	if position >= p.size {
+		return *NewToken(EOF, "")
 	}
-	return p.tokens[p.pos]
+	return p.tokens[position]
 }

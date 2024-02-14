@@ -6,13 +6,13 @@ import (
 )
 
 func main() {
-	lexer := parser.NewLexer("1 + 3 * 4")
+	lexer := parser.NewLexer("(2.6 + 2) * 4")
 	token := lexer.Tokenize()
 	parser := parser.NewParser(token)
 
 	expressions := parser.Parse()
 
 	for _, expression := range expressions {
-		fmt.Println(expression.Evel())
+		fmt.Printf("%s = %s \n", expression.ToString(), fmt.Sprint(expression.Evel()))
 	}
 }

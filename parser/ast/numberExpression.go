@@ -1,5 +1,9 @@
 package ast
 
+import (
+	"fmt"
+)
+
 type NumberExpression struct {
 	value float32
 }
@@ -10,4 +14,8 @@ func NewNumberExpression(value float32) *NumberExpression {
 
 func (ne *NumberExpression) Evel() float32 {
 	return ne.value
+}
+
+func (ne *NumberExpression) ToString() string {
+	return fmt.Sprint(ne.value)
 }
