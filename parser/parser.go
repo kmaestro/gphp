@@ -20,10 +20,10 @@ func NewParser(tokens []Token) *Parser {
 	}
 }
 
-func (p *Parser) Parse() []ast.Expression {
-	result := make([]ast.Expression, 0)
+func (p *Parser) Parse() []ast.Statement {
+	result := make([]ast.Statement, 0)
 	for !p.match(EOF) {
-		result = append(result, p.expression())
+		result = append(result, p.statement())
 	}
 	return result
 }
@@ -34,7 +34,7 @@ func (p *Parser) statement() ast.Statement {
 
 func (p *Parser) assignmentStatement() ast.Statement {
 	current := p.get(0)
-	if p.match(WORD) && p.get(0).tokenType == int8(EQ) {
+	if p.match(WORD) && p.get(0).tokenType == EQ {
 		variable := current.text
 		p.consume(EQ)
 		return ast.NewAssignmentStatement(variable, p.expression())
@@ -44,8 +44,8 @@ func (p *Parser) assignmentStatement() ast.Statement {
 
 func (p *Parser) consume(tokenType TokenType) Token {
 	current := p.get(0)
-	if string(tokenType) != current.text {
-		panic(fmt.Sprintf("Token %s doesn't match %s", current.text, tokenType))
+	if tokenType != TokenType(current.tokenType) {
+		panic(fmt.Sprintf("Token %s doesn't match %s", current.text, tokenTypeToString(tokenType)))
 	}
 	p.pos++
 	return current

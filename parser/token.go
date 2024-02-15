@@ -56,14 +56,14 @@ func tokenTypeToString(t TokenType) string {
 }
 
 type Token struct {
-	tokenType int8
+	tokenType TokenType
 	text      string
 }
 
 func NewToken(tokenType TokenType, text string) *Token {
 	return &Token{
 		text:      text,
-		tokenType: int8(tokenType),
+		tokenType: tokenType,
 	}
 }
 

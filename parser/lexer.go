@@ -63,7 +63,7 @@ func isLetter(r rune) bool {
 }
 
 func (l *Lexer) tokenizeOperator() {
-	operators := "+-*/()"
+	operators := "+-*/()="
 	position := strings.IndexRune(operators, l.peek(0))
 	tokenTypes := []TokenType{PLUS, MINUS, STAR, SLASH, LPAREN, RPAREN, EQ}
 	l.addToken(tokenTypes[position], "")
