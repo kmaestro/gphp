@@ -7,8 +7,12 @@ import (
 
 func main() {
 	lexer := parser.NewLexer("(2.6 + 2) * PI")
-	token := lexer.Tokenize()
-	parser := parser.NewParser(token)
+	tokens := lexer.Tokenize()
+
+	for _, token := range tokens {
+		fmt.Printf("%s\n", token.String())
+	}
+	parser := parser.NewParser(tokens)
 
 	expressions := parser.Parse()
 
