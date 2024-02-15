@@ -15,6 +15,8 @@ const (
 	LPAREN
 	RPAREN
 
+	EQ
+
 	WORD
 
 	EOF

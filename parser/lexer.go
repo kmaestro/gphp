@@ -27,10 +27,7 @@ func (l *Lexer) Tokenize() []Token {
 			l.tokenizeNumber()
 		} else if isLetter(current) {
 			l.tokenizeWord()
-		} else if current == '#' {
-			l.next()
-			l.tokenizeHexNumber()
-		} else if strings.ContainsRune("+-*/()", current) {
+		} else if strings.ContainsRune("+-*/()=", current) {
 			l.tokenizeOperator()
 		} else {
 			// whitespaces
@@ -57,16 +54,6 @@ func (l *Lexer) tokenizeNumber() {
 	l.addToken(NUMBER, buffer.String())
 }
 
-func (l *Lexer) tokenizeHexNumber() {
-	var buffer strings.Builder
-	current := l.peek(0)
-	for l.isDigit(current) {
-		buffer.WriteRune(current)
-		current = l.next()
-	}
-	l.addToken(HEX_NUMBER, buffer.String())
-}
-
 func (l *Lexer) isDigit(r rune) bool {
 	return '0' <= r && r <= '9'
 }
@@ -78,7 +65,7 @@ func isLetter(r rune) bool {
 func (l *Lexer) tokenizeOperator() {
 	operators := "+-*/()"
 	position := strings.IndexRune(operators, l.peek(0))
-	tokenTypes := []TokenType{PLUS, MINUS, STAR, SLASH, LPAREN, RPAREN}
+	tokenTypes := []TokenType{PLUS, MINUS, STAR, SLASH, LPAREN, RPAREN, EQ}
 	l.addToken(tokenTypes[position], "")
 	l.next()
 }

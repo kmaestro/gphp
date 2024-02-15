@@ -12,10 +12,10 @@ func NewNumberExpression(value float32) *NumberExpression {
 	return &NumberExpression{value: value}
 }
 
-func (ne *NumberExpression) Evel() float32 {
+func (ne *NumberExpression) Eval() float32 {
 	return ne.value
 }
 
-func (ne *NumberExpression) ToString() string {
+func (ne *NumberExpression) String() string {
 	return fmt.Sprint(ne.value)
 }

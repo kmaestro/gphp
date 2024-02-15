@@ -17,19 +17,19 @@ func NewBinaryExpression(operation rune, expr1 Expression, expr2 Expression) *bi
 	}
 }
 
-func (be *binaryExpression) Evel() float32 {
+func (be *binaryExpression) Eval() float32 {
 	switch be.operation {
 	case '-':
-		return be.expr1.Evel() - be.expr2.Evel()
+		return be.expr1.Eval() - be.expr2.Eval()
 	case '*':
-		return be.expr1.Evel() * be.expr2.Evel()
+		return be.expr1.Eval() * be.expr2.Eval()
 	case '/':
-		return be.expr1.Evel() / be.expr2.Evel()
+		return be.expr1.Eval() / be.expr2.Eval()
 	default:
-		return be.expr1.Evel() + be.expr2.Evel()
+		return be.expr1.Eval() + be.expr2.Eval()
 	}
 }
 
-func (be *binaryExpression) ToString() string {
-	return fmt.Sprintf("[%s %c %s]", be.expr1.ToString(), be.operation, be.expr2.ToString())
+func (be *binaryExpression) String() string {
+	return fmt.Sprintf("[%s %c %s]", be.expr1.String(), be.operation, be.expr2.String())
 }

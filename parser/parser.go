@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"php/parser/ast"
 	"strconv"
 )
@@ -27,6 +28,28 @@ func (p *Parser) Parse() []ast.Expression {
 	return result
 }
 
+func (p *Parser) statement() ast.Statement {
+	return p.assignmentStatement()
+}
+
+func (p *Parser) assignmentStatement() ast.Statement {
+	current := p.get(0)
+	if p.match(WORD) && p.get(0).tokenType == int8(EQ) {
+		variable := current.text
+		p.consume(EQ)
+		return ast.NewAssignmentStatement(variable, p.expression())
+	}
+	panic("Unknown statement")
+}
+
+func (p *Parser) consume(tokenType TokenType) Token {
+	current := p.get(0)
+	if string(tokenType) != current.text {
+		panic(fmt.Sprintf("Token %s doesn't match %s", current.text, tokenType))
+	}
+	p.pos++
+	return current
+}
 func (p *Parser) expression() ast.Expression {
 	return p.additive()
 }
@@ -102,6 +125,9 @@ func (p *Parser) primary() ast.Expression {
 	if p.match(HEX_NUMBER) {
 		val, _ := strconv.ParseInt(current.text, 16, 64)
 		return ast.NewNumberExpression(float32(val))
+	}
+	if p.match(WORD) {
+		return ast.NewVariabletExpression(current.text)
 	}
 	if p.match(LPAREN) {
 		result := p.expression()
