@@ -25,6 +25,8 @@ func (l *Lexer) Tokenize() []Token {
 		current := l.peek(0)
 		if l.isDigit(current) {
 			l.tokenizeNumber()
+		} else if current == '$' {
+			l.tokenizeVar()
 		} else if isLetter(current) {
 			l.tokenizeWord()
 		} else if strings.ContainsRune("+-*/()=", current) {
@@ -70,6 +72,20 @@ func (l *Lexer) tokenizeOperator() {
 	l.next()
 }
 
+func (l *Lexer) tokenizeVar() {
+	var buffer strings.Builder
+	l.next()
+	current := l.peek(0)
+	for {
+		if !isLetter(current) && !l.isDigit(current) && current != '_' && current != '$' {
+			break
+		}
+		buffer.WriteRune(current)
+		current = l.next()
+	}
+	l.addToken(VARIABLE, buffer.String())
+}
+
 func (l *Lexer) tokenizeWord() {
 	var buffer strings.Builder
 	current := l.peek(0)
@@ -80,7 +96,11 @@ func (l *Lexer) tokenizeWord() {
 		buffer.WriteRune(current)
 		current = l.next()
 	}
-	l.addToken(WORD, buffer.String())
+	if "echo" == buffer.String() {
+		l.addToken(ECHO, buffer.String())
+	} else {
+		l.addToken(CONSTANT, buffer.String())
+	}
 }
 
 func (l *Lexer) next() rune {

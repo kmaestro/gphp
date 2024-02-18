@@ -19,7 +19,9 @@ const (
 
 	EQ
 
-	WORD
+	CONSTANT
+	VARIABLE
+	ECHO
 
 	EOF
 )
@@ -46,8 +48,10 @@ func tokenTypeToString(t TokenType) string {
 		return "RPAREN"
 	case EQ:
 		return "EQ"
-	case WORD:
-		return "WORD"
+	case CONSTANT:
+		return "CONSTANT"
+	case VARIABLE:
+		return "VARIABLE"
 	case EOF:
 		return "EOF"
 	default:

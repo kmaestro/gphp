@@ -34,7 +34,10 @@ func (p *Parser) statement() ast.Statement {
 
 func (p *Parser) assignmentStatement() ast.Statement {
 	current := p.get(0)
-	if p.match(WORD) && p.get(0).tokenType == EQ {
+	if p.match(ECHO) {
+		return ast.NewEchoStatement(p.expression())
+	}
+	if (p.match(VARIABLE) || p.match(CONSTANT)) && p.get(0).tokenType == EQ {
 		variable := current.text
 		p.consume(EQ)
 		return ast.NewAssignmentStatement(variable, p.expression())
@@ -126,7 +129,10 @@ func (p *Parser) primary() ast.Expression {
 		val, _ := strconv.ParseInt(current.text, 16, 64)
 		return ast.NewNumberExpression(float32(val))
 	}
-	if p.match(WORD) {
+	if p.match(VARIABLE) {
+		return ast.NewVariabletExpression(current.text)
+	}
+	if p.match(CONSTANT) {
 		return ast.NewVariabletExpression(current.text)
 	}
 	if p.match(LPAREN) {
