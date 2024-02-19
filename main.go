@@ -37,9 +37,9 @@ func main() {
 	lexer := parser.NewLexer(string(content))
 	tokens := lexer.Tokenize()
 
-	// for _, token := range tokens {
-	// 	fmt.Printf("%s\n", token.String())
-	// }
+	for _, token := range tokens {
+		fmt.Printf("%s\n", token.String())
+	}
 	parser := parser.NewParser(tokens)
 
 	statements := parser.Parse()

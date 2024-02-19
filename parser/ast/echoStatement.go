@@ -11,10 +11,5 @@ func NewEchoStatement(expression Expression) *echoStatement {
 }
 
 func (es *echoStatement) Execute() {
-	fmt.Println(es.expression.Eval())
-}
-
-func (es *echoStatement) String() string {
-	fmt.Println(es.expression.Eval())
-	return ""
+	fmt.Print(es.expression.Eval())
 }

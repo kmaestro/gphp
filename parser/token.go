@@ -54,6 +54,8 @@ func tokenTypeToString(t TokenType) string {
 		return "CONSTANT"
 	case VARIABLE:
 		return "VARIABLE"
+	case ECHO:
+		return "ECHO"
 	case EOF:
 		return "EOF"
 	default:
