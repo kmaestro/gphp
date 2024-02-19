@@ -11,6 +11,16 @@ type Lexer struct {
 	pos    int
 }
 
+var operators = map[rune]TokenType{
+	'+': PLUS,
+	'-': MINUS,
+	'*': STAR,
+	'/': SLASH,
+	'(': LPAREN,
+	')': RPAREN,
+	'=': EQ,
+}
+
 func NewLexer(input string) *Lexer {
 	return &Lexer{
 		input:  input,
@@ -21,15 +31,24 @@ func NewLexer(input string) *Lexer {
 }
 
 func (l *Lexer) Tokenize() []Token {
+	isCode := false
+	var buffer strings.Builder
 	for l.pos < l.length {
 		current := l.peek(0)
+		if buffer.String() != "<?php" && !isCode {
+			buffer.WriteRune(current)
+			l.next()
+			continue
+		} else {
+			isCode = true
+		}
 		if l.isDigit(current) {
 			l.tokenizeNumber()
 		} else if current == '$' {
 			l.tokenizeVar()
 		} else if isLetter(current) {
 			l.tokenizeWord()
-		} else if strings.ContainsRune("+-*/()=", current) {
+		} else if _, operator := operators[current]; operator {
 			l.tokenizeOperator()
 		} else {
 			// whitespaces
@@ -96,9 +115,12 @@ func (l *Lexer) tokenizeWord() {
 		buffer.WriteRune(current)
 		current = l.next()
 	}
-	if "echo" == buffer.String() {
-		l.addToken(ECHO, buffer.String())
-	} else {
+	switch buffer.String() {
+	case "if":
+		l.addToken(IF, "")
+	case "echo":
+		l.addToken(ECHO, "")
+	default:
 		l.addToken(CONSTANT, buffer.String())
 	}
 }

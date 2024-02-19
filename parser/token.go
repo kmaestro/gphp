@@ -19,6 +19,8 @@ const (
 
 	EQ
 
+	// keyword
+	IF
 	CONSTANT
 	VARIABLE
 	ECHO
