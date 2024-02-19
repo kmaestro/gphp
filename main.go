@@ -1,11 +1,40 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"os"
 	"php/parser"
 )
 
 func main() {
-	lexer := parser.NewLexer("$word = 2+2; $word2 = PI + $word; echo $word2")
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: go run main.go <filename>")
+		return
+	}
+
+	filename := os.Args[1]
+
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Fatalf("Error opening file: %v", err)
+	}
+	defer file.Close()
+
+	fileInfo, err := file.Stat()
+	if err != nil {
+		log.Fatalf("Error getting file information: %v", err)
+	}
+	fileSize := fileInfo.Size()
+
+	content := make([]byte, fileSize)
+
+	_, err = file.Read(content)
+	if err != nil {
+		log.Fatalf("Error reading file: %v", err)
+	}
+
+	lexer := parser.NewLexer(string(content))
 	tokens := lexer.Tokenize()
 
 	// for _, token := range tokens {
